@@ -1,0 +1,36 @@
+networks: { internal: {} }
+
+services:
+  app:
+    build:
+      context: .                          # ★ このディレクトリに今の Dockerfile がある想定
+      dockerfile: Dockerfile
+    container_name: jmaneserver-app
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/jmane
+      DB_USER: jmane_user
+      DB_PASSWORD: secret
+    networks:
+      - internal
+
+  db:
+    image: postgres:16                    # ★ ここは必ず postgres 公式イメージ
+    container_name: jmane-db
+    environment:
+      POSTGRES_DB: jmane               # 好きなDB名
+      POSTGRES_USER: jmane_user
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "25432:5432"                      # ホスト:コンテナ
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+    networks:
+      - internal
+
+volumes:
+  db-data:
