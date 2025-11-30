@@ -38,4 +38,6 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json")
     implementation("io.ktor:ktor-server-content-negotiation")
     implementation("at.favre.lib:bcrypt:0.9.0")
+
+    implementation("io.ktor:ktor-server-auth-jwt-jvm")
 }
