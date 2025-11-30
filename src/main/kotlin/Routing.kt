@@ -1,13 +1,17 @@
 package com.example
 
 import com.example.auth.JwtConfig
+import com.example.module.request.GetClassSessionRequest
 import com.example.module.request.LoginRequest
+import com.example.module.response.ClassSession
+import com.example.module.response.GetClassSessionsResponse
 import com.example.module.response.LoginResponse
+import com.example.service.ClassSessionService
+import com.example.service.IClassSessionService
 import com.example.service.IUserService
 import com.example.service.UserService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
-import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
@@ -18,13 +22,14 @@ import org.koin.java.KoinJavaComponent.inject
 
 fun Application.configureRouting() {
     val userService by inject<IUserService>(UserService::class.java)
+    val classSessionService by inject<IClassSessionService>(ClassSessionService::class.java)
 
     routing {
         get("/") {
             call.respondText("Hello World!")
         }
 
-        post("/login") {
+        post("auth/login") {
             val request = call.receive<LoginRequest>()
 
             val email = request.email
@@ -37,17 +42,55 @@ fun Application.configureRouting() {
         }
 
         authenticate("auth-jwt") {
-            get("/me") {
+            get("auth/me") {
                 val principal = call.principal<JWTPrincipal>()
-                val userId = principal!!.subject
-                val name = principal.getClaim("name", String::class)
+                val name = principal?.getClaim("name", String::class)
+                val role = principal?.getClaim("role", String::class)
+
+                if (name.isNullOrBlank() || role.isNullOrBlank()) return@get call.respond(HttpStatusCode.BadRequest, "user not found")
 
                 call.respond(
                     mapOf(
-                        "userId" to userId,
-                        "name" to name
+                        "name" to name,
+                        "role" to role
                     )
                 )
+            }
+
+            get("classes/today") {
+                val classSessions: MutableList<ClassSession> = mutableListOf()
+
+                val principal = call.principal<JWTPrincipal>()
+                val userId = principal?.subject ?: return@get call.respond(HttpStatusCode.Unauthorized, "Unauthorized")
+
+                if (userId.toIntOrNull() == null) return@get call.respond(HttpStatusCode.BadRequest, "user not found")
+
+                val request = call.receive<GetClassSessionRequest>()
+                val date = request.date
+                if (date.isNullOrBlank()) {
+                    call.respond(HttpStatusCode.BadRequest, "date is required")
+                    return@get
+                }
+
+                val result = classSessionService.getClassesForTodayByUserId(userId.toInt(), date)
+                result.forEach { session ->
+                    classSessions.add(
+                        ClassSession(
+                            id = session.id,
+                            startDateTime = session.startDateTime,
+                            endDateTime = session.endDateTime,
+                            roomName = session.roomName,
+                            gradeName = session.gradeName,
+                            subjectName = session.subjectName,
+                            countPresent = session.countPresent,
+                            countAbsent = session.countAbsent,
+                            countLate = session.countLate,
+                            reportStatus = session.reportStatus
+                        )
+                    )
+                }
+
+                call.respond(HttpStatusCode.OK, GetClassSessionsResponse(classSessions))
             }
         }
     }

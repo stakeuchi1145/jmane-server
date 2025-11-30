@@ -1,6 +1,8 @@
 package com.example
 
+import com.example.repository.ClassSessionRepository
 import com.example.repository.UserRepository
+import com.example.service.ClassSessionService
 import com.example.service.UserService
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -21,7 +23,9 @@ object KoinModule {
         }
 
         single { UserService() }
+        single { ClassSessionService() }
 
         single { UserRepository() }
+        single { ClassSessionRepository() }
     }
 }
