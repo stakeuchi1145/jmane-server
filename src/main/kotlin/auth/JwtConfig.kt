@@ -7,7 +7,8 @@ import java.util.Date
 
 object JwtConfig {
     // 開発用の適当な秘密鍵（本番はもっと長く&環境変数で）
-    const val secret = "super-secret-jwt-key-change-me"
+    private const val defaultSecretForDev = "local-dev-only-secret-change-me"
+    val secret = System.getenv("JWT_SECRET") ?: defaultSecretForDev
     const val issuer = "com.example"
     const val audience = "com.example.audience"
     const val realm = "Access to teacher api"

@@ -27,17 +27,13 @@ fun Application.configureRouting() {
         post("/login") {
             val request = call.receive<LoginRequest>()
 
-            request.email?.let { email ->
-                request.password?.let { password ->
-                    val user = userService.getUserByEmail(email, password) ?: run {
-                        call.respond(HttpStatusCode.BadRequest, "user not found")
-                        return@post
-                    }
+            val email = request.email
+            val password = request.password
 
-                    val token = JwtConfig.generateToken(user)
-                    call.respond(HttpStatusCode.OK, LoginResponse(token))
-                }
-            }
+            if (email.isNullOrBlank() || password.isNullOrBlank()) return@post call.respond(HttpStatusCode.BadRequest, "email and password are required")
+            val user = userService.authenticateUser(email, password) ?: return@post call.respond(HttpStatusCode.BadRequest, "user not found")
+
+            call.respond(HttpStatusCode.OK, LoginResponse(JwtConfig.generateToken(user)))
         }
 
         authenticate("auth-jwt") {

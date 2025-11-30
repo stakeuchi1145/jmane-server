@@ -9,13 +9,16 @@ import org.koin.java.KoinJavaComponent.inject
 class UserService: IUserService {
     private val userRepository by inject<IUserRepository>(UserRepository::class.java)
 
-    override fun getUserByEmail(email: String, password: String): Users? {
+    override fun getUserByEmail(email: String): Users? {
         userRepository.getUserByEmail(email)?.let { user ->
-            if (!verify(password, user.password)) return null
-            return user
         }
 
         return null
+    }
+
+    override fun authenticateUser(email: String, password: String): Users? {
+        val user = userRepository.getUserByEmail(email) ?: return null
+        return if (verify(password, user.password)) user else null
     }
 
     override fun getUserById(id: Int): Users? {

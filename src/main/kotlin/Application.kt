@@ -37,9 +37,9 @@ fun Application.module() {
                 )
 
                 validate { credential ->
-                    val userId = credential.payload.subject
+                    val userId = credential.payload.subject?.toIntOrNull()
                     if (userId != null) {
-                        if (userService.getUserById(userId.toInt()) == null) {
+                        if (userService.getUserById(userId) == null) {
                             return@validate null
                         }
 
