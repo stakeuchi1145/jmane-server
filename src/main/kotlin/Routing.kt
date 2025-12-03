@@ -57,7 +57,7 @@ fun Application.configureRouting() {
                 )
             }
 
-            get("classes/today") {
+            get("classes/{date}") {
                 val classSessions: MutableList<ClassSession> = mutableListOf()
 
                 val principal = call.principal<JWTPrincipal>()
@@ -65,8 +65,7 @@ fun Application.configureRouting() {
 
                 if (userId.toIntOrNull() == null) return@get call.respond(HttpStatusCode.BadRequest, "user not found")
 
-                val request = call.receive<GetClassSessionRequest>()
-                val date = request.date
+                val date = call.parameters["date"]
                 if (date.isNullOrBlank()) {
                     call.respond(HttpStatusCode.BadRequest, "date is required")
                     return@get

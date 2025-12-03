@@ -12,7 +12,7 @@ SELECT
 FROM class_sessions cs
          JOIN rooms r ON cs.room_id = r.id
          JOIN grades g ON cs.grade_id = g.id
-         JOIN grade_groups gg ON cs.grade_group_id = gG.id
+         JOIN grade_groups gg ON cs.grade_group_id = gg.id
          LEFT JOIN attendance_records ar ON ar.class_session_id = cs.id
          LEFT JOIN lesson_reports lr ON lr.class_session_id = cs.id
 WHERE cs.teacher_id = ?

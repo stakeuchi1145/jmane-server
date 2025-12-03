@@ -10,10 +10,7 @@ class UserService: IUserService {
     private val userRepository by inject<IUserRepository>(UserRepository::class.java)
 
     override fun getUserByEmail(email: String): Users? {
-        userRepository.getUserByEmail(email)?.let { user ->
-        }
-
-        return null
+        return userRepository.getUserByEmail(email)
     }
 
     override fun authenticateUser(email: String, password: String): Users? {
