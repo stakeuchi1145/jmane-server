@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(64) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    image_url VARCHAR(255),
     role VARCHAR(32) NOT NULL,        -- TEACHER / ADMIN
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

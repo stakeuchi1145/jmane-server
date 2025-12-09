@@ -44,17 +44,12 @@ fun Application.configureRouting() {
         authenticate("auth-jwt") {
             get("auth/me") {
                 val principal = call.principal<JWTPrincipal>()
-                val name = principal?.getClaim("name", String::class)
-                val role = principal?.getClaim("role", String::class)
+                val userId = principal?.subject ?: return@get call.respond(HttpStatusCode.Unauthorized, "Unauthorized")
+                val user = userService.getUserById(userId.toIntOrNull() ?: return@get call.respond(HttpStatusCode.Unauthorized, "Unauthorized"))
 
-                if (name.isNullOrBlank() || role.isNullOrBlank()) return@get call.respond(HttpStatusCode.BadRequest, "user not found")
-
-                call.respond(
-                    mapOf(
-                        "name" to name,
-                        "role" to role
-                    )
-                )
+                user?.let {
+                    call.respond(HttpStatusCode.OK, mapOf("name" to it.name, "imageUrl" to it.imageUrl, "role" to it.role))
+                } ?: call.respond(HttpStatusCode.Unauthorized, "Unauthorized")
             }
 
             get("classes/{date}") {

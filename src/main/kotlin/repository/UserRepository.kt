@@ -21,6 +21,7 @@ class UserRepository : IUserRepository {
                             resultSet.getString("name"),
                             resultSet.getString("email"),
                             resultSet.getString("password_hash"),
+                            resultSet.getString("image_url"),
                             resultSet.getString("role")
                         )
                     }
@@ -44,6 +45,7 @@ class UserRepository : IUserRepository {
                             resultSet.getString("name"),
                             resultSet.getString("email"),
                             resultSet.getString("password_hash"),
+                            resultSet.getString("image_url"),
                             resultSet.getString("role")
                         )
                     }
