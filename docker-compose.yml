@@ -32,5 +32,39 @@ services:
     networks:
       - internal
 
+  minio:
+    image: minio/minio:latest
+    container_name: jmane-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: "jmaneadmin"
+      MINIO_ROOT_PASSWORD: "jmanesecret"
+    ports:
+      - "9100:9000"  # ホスト 9100 → コンテナ内部 9000(S3 API)
+      - "9101:9001"  # ホスト 9101 → コンテナ内部 9001(Console)
+    volumes:
+      - minio-data:/data
+    networks:
+      - internal
+
+  minio-seed:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      echo 'waiting minio...' &&
+      sleep 5 &&
+      mc alias set local http://minio:9000 jmaneadmin jmanesecret &&
+      mc mb --ignore-existing local/users &&
+      mc cp --recursive /seed/user local/ &&
+      mc anonymous set download local/users
+      "
+    volumes:
+      - ./seed-images:/seed:ro
+    networks:
+      - internal
+
 volumes:
   db-data:
+  minio-data:
